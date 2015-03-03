@@ -20,7 +20,7 @@ package edu.uniandes.ecos.model;
 /**
  *
  * @author Diego Andres Montealegre Garcia
- * @version 1.0, 02/22/05
+ * @version 1.1, 03/02/05
  * @since 1.0
  */
 public class Simpson {
@@ -57,7 +57,7 @@ public class Simpson {
 
     private double integralComparar;
 
-    private double parameterD = 0.5;
+    private double parametroD = 0.5;
 
     /**
      * Constructor de la clase
@@ -95,61 +95,63 @@ public class Simpson {
 
     }
 
-    public Simpson(double dofP, double parameterP, double comienzo, double algo) {
+    /**
+     * Constructor de la clase para encontrar el valor de X
+     * @param dofP grados de libertad
+     * @param parametroBuscadoP valor del parametro buscado P
+     */
+    public Simpson(double dofP, double parametroBuscadoP) {
         this.dof = dofP;
         this.parameterE = 0.00001;
         this.integralDefinitiva = 0;
         this.integralInicialP = 0;
         this.parameterW = 0;
-        this.num_seg = 10;
-        this.parameterE = 0.00001;
+        this.num_seg = 30;
         this.dof = dofP;
         this.parameterX = 1;
         double diferencia = 0;
-        double parameterXP = comienzo;
+        double parametroBuscadoX = 1;
 
-        this.integralInicialP = Calcular(parameterXP, num_seg);
-        diferencia = Math.abs(this.integralInicialP - parameterP);
+        this.integralInicialP = Calcular(parametroBuscadoX, num_seg);
+        diferencia = Math.abs(this.integralInicialP - parametroBuscadoP);
         if (diferencia > this.parameterE) {
-            parameterX = parameterXP;
-
+            parameterX = parametroBuscadoX;
         }
         this.integralComparar = this.integralInicialP;
 
-        if (this.integralInicialP < parameterP) {
-            parameterXP = parameterXP + parameterD;
+        if (this.integralInicialP < parametroBuscadoP) {
+            parametroBuscadoX = parametroBuscadoX + parametroD;
         } else {
-            parameterXP = parameterXP - parameterD;
-
+            parametroBuscadoX = parametroBuscadoX - parametroD;
         }
-        while (diferencia > this.parameterE) {
-            this.integralDefinitiva = Calcular(parameterXP, num_seg);
-            diferencia = Math.abs(this.integralDefinitiva - parameterP);
-            if (diferencia > this.parameterE) {
-                parameterX = parameterXP;
-
-            }
-            if (this.integralDefinitiva < parameterP) {
-
-                parameterD = adjustD(parameterD, integralDefinitiva);
-                parameterXP = parameterXP + parameterD;
-
+       while (diferencia > this.parameterE){
+            this.integralDefinitiva = Calcular(parametroBuscadoX, num_seg);
+            diferencia = Math.abs(this.integralDefinitiva - parametroBuscadoP);
+            if (this.integralDefinitiva < parametroBuscadoP) {
+                parametroD = adjustD(parametroD, this.integralDefinitiva, parametroBuscadoP);
+                parametroBuscadoX = parametroBuscadoX + parametroD;
             } else {
-                parameterD = adjustD(parameterD, integralDefinitiva);
-                parameterXP = parameterXP - parameterD;
-
+                parametroD = adjustD(parametroD, this.integralDefinitiva,parametroBuscadoP);
+                parametroBuscadoX = parametroBuscadoX - parametroD;
             }
             this.integralComparar = this.integralDefinitiva;
-        };
-
+            if (diferencia < this.parameterE) {
+                parameterX = parametroBuscadoX;
+            }
+        }  
     }
 
-    public double adjustD(double adjustDP, double first) {
-
-        if (first < 0) {
+    /**
+     * Metodo que ajusta el valor de D
+     * @param adjustDP valor de D
+     * @param parametroIntegral valor de P en la integral
+     * @param parametroBuscadoP valor de P que estamos buscando
+     * @return adjustDP ajustado
+     */
+    public double adjustD(double adjustDP, double parametroIntegral, double parametroBuscadoP) {
+        if (parametroIntegral < parametroBuscadoP) {
             return adjustDP;
         }
-
         return adjustDP / 2;
     }
 
@@ -178,6 +180,9 @@ public class Simpson {
 
     }
 
+    /**
+     * Constructor Vacio de la clase
+     */
     public Simpson() {
         this.integralDefinitiva = 0;
         this.integralInicialP = 0;
